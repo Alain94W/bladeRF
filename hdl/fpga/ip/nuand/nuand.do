@@ -19,6 +19,8 @@ proc compile_nuand { root platform } {
     vcom -work nuand -2008 [file join $root ./synthesis/handshake.vhd]
     vcom -work nuand -2008 [file join $root ./synthesis/tb/handshake_tb.vhd]
 
+    vcom -work nuand -2008 [file join $root ./synthesis/rx_packet_generator.vhd]
+
     vcom -work nuand -2008 [file join $root ./synthesis/signal_processing_p.vhd]
 
     vcom -work nuand -2008 [file join $root ../altera/common_dcfifo/common_dcfifo.vhd]
@@ -51,7 +53,6 @@ proc compile_nuand { root platform } {
     vcom -work nuand -2008 [file join $root ./synthesis/fifo_readwrite_p.vhd]
     vcom -work nuand -2008 [file join $root ./synthesis/fifo_reader.vhd]
     vcom -work nuand -2008 [file join $root ./synthesis/fifo_writer.vhd]
-    vcom -work nuand -2008 [file join $root ./simulation/sample_stream_tb.vhd]
 
     vcom -work nuand -2008 [file join $root ./trigger/trigger.vhd]
     vcom -work nuand -2008 [file join $root ./synthesis/signal_generator.vhd]
@@ -60,4 +61,8 @@ proc compile_nuand { root platform } {
 
     vcom -work nuand -2008 [file join $root ./pll_reset/vhdl/pll_reset.vhd]
     vcom -work nuand -2008 [file join $root ./ps_sync/vhdl/ps_sync.vhd]
+}
+
+proc compile_nuand_tb { root platform } {
+    vcom -work nuand -2008 [file join $root ./simulation/sample_stream_tb.vhd]
 }
