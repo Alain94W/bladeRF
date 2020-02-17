@@ -190,7 +190,7 @@ begin
         end if;
     end process;
 
-    packet_empty <= '1' when ( packet_en = '1' and meta_fifo_empty = '1' ) else '0' ;
+    packet_empty <= '1' when ( packet_en = '1' and meta_fifo_empty = '1' and meta_current.state /= META_WAIT ) else '0' ;
 
     -- Meta FIFO combinatorial process
     meta_fsm_comb : process( all )
@@ -221,7 +221,7 @@ begin
                                (packet_en = '1' and packet_ready = '1') ) ) then
                        meta_future.meta_read <= '1';
                        meta_future.state     <= META_WAIT;
-                       if( meta_time /= timestamp ) then
+                       if( packet_en = '1' or meta_time /= timestamp ) then
                              meta_future.meta_time_go  <= '0';
                           else
                              meta_future.meta_time_go  <= '1';
@@ -444,14 +444,12 @@ begin
                     fifo_future.packet_control.data <= fifo_data(31 downto 0);
                 end if;
 
-                if( meta_current.meta_time_go = '1' and meta_current.dma_downcount = 2 ) then
-                    fifo_future.packet_control.pkt_eop <= '1';
-                else
-                    fifo_future.packet_control.pkt_eop <= '0';
-                end if;
-
+                fifo_future.packet_control.pkt_eop <= '0';
 
                 if( fifo_empty = '0' and meta_current.meta_time_go = '1' and meta_current.dma_downcount > 0 and packet_ready = '1' ) then
+                    if( meta_current.dma_downcount = 1 ) then
+                        fifo_future.packet_control.pkt_eop <= '1';
+                    end if;
                     fifo_future.packet_control.data_valid <= '1';
 
                     if( fifo_current.samples_left = NUM_STREAMS - 1) then
