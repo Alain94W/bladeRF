@@ -234,7 +234,7 @@ begin
             when META_WAIT =>
 
                 if( packet_en = '1' ) then
-                   meta_future.dma_downcount <= to_integer(unsigned(meta_current.meta_cache(15 downto 0)));
+                   meta_future.dma_downcount <= to_integer(unsigned(meta_current.meta_cache(15 downto 0))) - 1;
                 else
                    meta_future.dma_downcount <= dma_buf_size - 4;
                 end if;
