@@ -103,8 +103,8 @@ begin
 
         wait for 30 us;
 
+        dma_rx_enable <= '1';
         for j in 1 to ITERATIONS loop
-            dma_rx_enable <= '1';
 
             for i in 1 to BLOCKS_PER_ITERATION loop
                 dma0_rx_reqx    <= '0';
@@ -128,9 +128,9 @@ begin
                 end loop;
             end loop;
 
-            dma_rx_enable <= '0';
             wait for 10 us;
         end loop;
+        dma_rx_enable <= '0';
 
         report "Done with RX sample stream";
         rx_done <= true;
@@ -159,8 +159,8 @@ begin
 
         wait for 30 us;
 
+        dma_tx_enable <= '1';
         for k in 1 to ITERATIONS loop
-            dma_tx_enable <= '1';
 
             for j in 1 to 2 loop
                 header_len      := 0;
@@ -223,9 +223,9 @@ begin
             end loop;
 
             wait for 1 ms;
-            dma_tx_enable <= '0';
             wait for 10 us;
         end loop;
+        dma_tx_enable <= '0';
 
        report "Done with TX sample stream";
        tx_done <= true;
