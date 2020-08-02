@@ -31,10 +31,10 @@ library work;
 
 entity rx_packet_generator is
     generic (
-        PACKET_LEN         : integer := 500;
-        MAX_LEN            : integer := 1000;
-        INCR               : integer := 50;
-        GAP                : integer := 10
+        PACKET_LEN         : integer := 10;
+        MAX_LEN            : integer := 200;
+        INCR               : integer := 1;
+        GAP                : integer := 1000
     );
 
     port (
@@ -60,7 +60,8 @@ architecture arch of rx_packet_generator is
     type fsm_t is record
         state       : state_t;
         hold_count  : integer range -1 to GAP + 2;
-        write_count : integer range -1 to PACKET_LEN;
+        write_count : integer range -1 to MAX_LEN;
+        write_len   : integer range -1 to MAX_LEN;
         pkt_id      : integer range 0 to 65536;
         pkt         : packet_control_t;
     end record;
@@ -69,6 +70,7 @@ architecture arch of rx_packet_generator is
         state       => IDLE,
         hold_count  => 0,
         write_count => 0,
+        write_len   => PACKET_LEN,
         pkt_id      => 0,
         pkt         => PACKET_CONTROL_DEFAULT
     );
@@ -90,6 +92,7 @@ begin
     rx_packet_control <= current.pkt;
 
     fsm_comb : process(all)
+        variable tmp_len : integer range -1 to (MAX_LEN + INCR + 1);
     begin
 
         future <= current;
@@ -101,11 +104,18 @@ begin
                 future.hold_count <= 0;
                 future.write_count <= 0;
                 if( rx_enable = '1' and rx_packet_enable = '1' ) then
+                    tmp_len := current.write_len + INCR;
+                    if( tmp_len > MAX_LEN ) then
+                        tmp_len := PACKET_LEN;
+                    else
+                        tmp_len := current.write_len + INCR;
+                    end if;
+                    future.write_len <= tmp_len;
                     future.state <= HOLDOFF;
                 end if;
 
             when HOLDOFF =>
-                future.write_count <= PACKET_LEN;
+                future.write_count <= current.write_len;
                 future.hold_count <= current.hold_count + 1;
                 if(current.hold_count = GAP) then
                     future.state <= WAITED;
@@ -118,10 +128,13 @@ begin
 
             when WRITE =>
 
-                future.pkt.data_valid <= '1';
                 future.pkt.data <= std_logic_vector(to_unsigned(current.pkt_id, 16)) & std_logic_vector(to_unsigned(current.write_count, 16));
 
-                if(current.write_count = PACKET_LEN) then
+                if(current.write_count < current.write_len) then
+                    future.pkt.data_valid <= '1';
+                end if;
+
+                if(current.write_count = current.write_len - 1) then
                     future.pkt.pkt_sop <= '1';
                     future.pkt.data_valid <= '1';
                 elsif(current.write_count = 1) then
