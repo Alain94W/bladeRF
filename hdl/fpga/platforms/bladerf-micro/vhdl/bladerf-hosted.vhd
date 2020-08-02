@@ -149,6 +149,7 @@ architecture hosted_bladerf of bladerf is
     signal dac_streams            : sample_streams_t(dac_controls'range)  := (others => ZERO_SAMPLE);
     signal adc_controls           : sample_controls_t(ad9361.ch'range)    := (others => SAMPLE_CONTROL_DISABLE);
     signal adc_streams            : sample_streams_t(adc_controls'range)  := (others => ZERO_SAMPLE);
+    signal saved_adc_valid        : std_logic_vector(adc_controls'range)  := (others => '0');
 
     signal   ps_sync              : std_logic_vector(0 downto 0)          := (others => '0');
 
@@ -643,8 +644,19 @@ begin
             adc_controls(i).data_req <= '1';
             adc_streams(i).data_i    <= signed(ad9361.ch(i).adc.i.data);
             adc_streams(i).data_q    <= signed(ad9361.ch(i).adc.q.data);
-            adc_streams(i).data_v    <= ad9361.ch(i).adc.i.valid  or ad9361.ch(i).adc.q.valid;
+            adc_streams(i).data_v    <= ( ad9361.ch(i).adc.i.valid  or ad9361.ch(i).adc.q.valid ) and not saved_adc_valid(i);
         end loop;
+    end process;
+
+    saved_adc_valid_proc : process( rx_clock, rx_reset )
+    begin
+        if( rx_reset = '1' ) then
+            saved_adc_valid <= ( others => '0' );
+        elsif( rising_edge( rx_clock ) ) then
+            for i in adc_controls'range loop
+                saved_adc_valid(i) <= ad9361.ch(i).adc.i.valid  or ad9361.ch(i).adc.q.valid;
+            end loop;
+        end if;
     end process;
 
     -- ========================================================================
