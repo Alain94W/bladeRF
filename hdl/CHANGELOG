@@ -6,6 +6,17 @@ hosted on GitHub: https://github.com/nuand/bladeRF
 ================================================================================
 
 --------------------------------
+v0.12.0 (2020-08-01)
+--------------------------------
+
+ This version adds short packet states to the GPIF allowing the FPGA to exchange
+ variable length packets with the FX3.
+
+ Features:
+
+ * bladerf: added support for short packets
+
+--------------------------------
 v0.11.0 (2019-05-05)
 --------------------------------
 
