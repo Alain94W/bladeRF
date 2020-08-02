@@ -404,17 +404,17 @@ begin
                 report "TX iteration " & to_string(k) & " block " & to_string(j) & " delay " & to_string(now - req_time);
 
 
-                packet_len      := 7;
+                packet_len      := 508;
                 if( fx3_tx_meta_en = '1') then
                     header_len := 4;
 
                     for i in 1 to 4 loop
                         case (i) is
                             when 1 =>
-                                data_out := x"100000" & std_logic_vector(to_unsigned(packet_len, 8));
+                                data_out := x"00000000";
                             when 2 =>
                                 data_out(31 downto 0) := std_logic_vector(to_signed(timestamp_cntr, 32));
-                                timestamp_cntr := timestamp_cntr + 300;
+                                timestamp_cntr := timestamp_cntr + 508;
                             when 3 =>
                                 data_out := (others => '0');
                             when 4 =>
